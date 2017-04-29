@@ -1,0 +1,48 @@
+SOCIAL MEDIA – STACK OVERFLOW
+
+Tool Used: 
+
+I have opted to complete the project with HIVE using cloud lab.
+
+Process followed:
+
+1.) Downloaded the answers csv file and edited it according to distinguish the tags column with collection delimiter ":".
+
+Then uploaded the same to cloud lab HDFS using the techniques learned during session. In this case through upload link in file browser.
+
+2.) Used my existing database "desh" to create table for the file uploaded in hdfs.
+
+3.) Created table with below script:
+
+      create table socialmediaIntelligence(recordno int,qid int,questionaire_uid int,scores_question int,time_of_question bigint,tags array<string>,noofviews int,noofanswers int,uniqueanswerid int,userid_of_answerer int,answer_score int,time_of_answer bigint)
+row format delimited 
+fields terminated by ','
+collection items terminated by '\:';
+
+4.) Loaded the data in the table from HDFS path as:
+
+LOAD DATA INPATH '/user/ff94ed73875dca0944a2a34e7a2810/answers11.csv' OVERWRITE INTO TABLE socialmediaIntelligence;
+
+5.) Created Query for top 10 most commonly used tags as:
+
+select tags, count(*) as countoftags  from socialmediaIntelligence group by tags order by countoftags desc limit 10;
+
+6.) Created Query to find average time to answer question as:
+
+Select averagetime as TimeInSeconds, round(averagetime /3600,1) as ApproxTimeInHours from
+
+(
+
+Select cast(avg(time_of_answer - time_of_question) as BIGINT) as averagetime from socialmediaIntelligence 
+
+) avg;
+
+7.) Created Query to find number of questions which got answered within 1 hour as:
+
+
+select count(distinct qid) as noofquestions from socialmediaIntelligence  where (time_of_answer - time_of_question)<3600;
+
+8.) Created Query to find tags of questions which got answered within 1 hour as:
+
+
+select distinct tags as tagsofquestion from socialmediaIntelligence where (time_of_answer - time_of_question)<3600;
